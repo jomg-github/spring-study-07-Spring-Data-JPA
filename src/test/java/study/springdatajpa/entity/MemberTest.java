@@ -3,11 +3,15 @@ package study.springdatajpa.entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import study.springdatajpa.repository.MemberRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +21,9 @@ class MemberTest {
 
     @PersistenceContext
     EntityManager em;
+
+    @Autowired
+    MemberRepository memberRepository;
 
     @Test
     void 회원_엔티티_연관관계_테스트() {
@@ -45,6 +52,26 @@ class MemberTest {
         for (Member member : members) {
             System.out.println(member.getTeam() + " >>>>> member = " + member);
         }
+    }
+
+    @Test
+    void JpaBaseEntity_MappedSuperClass() throws InterruptedException {
+        // given
+        Member member = memberRepository.save(new Member("MEMBER A")); // @PrePersist
+        Thread.sleep(100);
+        member.setName("MEMBER A(modified)");
+        em.flush(); // @PreUpdate
+        em.clear();
+
+        // when
+        Member findMember = memberRepository.findById(member.getId()).orElseThrow(NoSuchElementException::new);
+
+        // then
+        System.out.println("findMember = " + findMember);
+        System.out.println("    findMember.getCreatedDate() = " + findMember.getCreatedDate());
+        System.out.println("    findMember.getUpdatedDate() = " + findMember.getUpdatedDate());
+        System.out.println("    findMember.getCreatedBy() = " + findMember.getCreatedBy());
+        System.out.println("    findMember.getUpdatedBy() = " + findMember.getUpdatedBy());
     }
 
 }
