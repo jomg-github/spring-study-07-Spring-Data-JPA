@@ -1,8 +1,10 @@
 package study.springdatajpa.repository;
 
+import jakarta.persistence.Entity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -43,4 +45,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 //    @Modifying(clearAutomatically = true) // 쿼리 실행 이후 영속성 컨텍스트 비워주는 옵션
     @Query("update Member m set m.age = m.age + 1")
     Integer bulkAgePlus1();
+
+    @Query("select m from Member m join fetch m.team")
+    List<Member> findAllFetchJoin();
+
+    @Override
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findAll();
+
+    @EntityGraph(attributePaths = {"team"})
+    @Query("select m from Member m")
+    List<Member> findAllEntityGraph();
 }

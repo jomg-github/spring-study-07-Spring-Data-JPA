@@ -242,4 +242,61 @@ class MemberRepositoryTest {
         assertThat(affectedRows).isEqualTo(total);
         assertThat(age31Members.size()).isEqualTo(total);
     }
+
+    @Test
+    void 회원조회_LazyLoading_였다가_엔티티그래프로() {
+        // given
+        Team teamA = teamRepository.save(new Team("TEAM A"));
+        Team teamB = teamRepository.save(new Team("TEAM B"));
+        Member memberA = memberRepository.save(new Member("MEMBER A", 30, teamA));
+        Member memberB = memberRepository.save(new Member("MEMBER B", 25, teamB));
+        em.flush();
+        em.clear();
+
+        // when
+        List<Member> members = memberRepository.findAll();
+
+        // then
+        for (Member member : members) {
+            System.out.println(member.getTeam().getName() + " => " + member);
+        }
+    }
+
+    @Test
+    void 회원조회_FetchJoin() {
+        // given
+        Team teamA = teamRepository.save(new Team("TEAM A"));
+        Team teamB = teamRepository.save(new Team("TEAM B"));
+        Member memberA = memberRepository.save(new Member("MEMBER A", 30, teamA));
+        Member memberB = memberRepository.save(new Member("MEMBER B", 25, teamB));
+        em.flush();
+        em.clear();
+
+        // when
+        List<Member> members = memberRepository.findAllFetchJoin();
+
+        // then
+        for (Member member : members) {
+            System.out.println(member.getTeam().getName() + " => " + member);
+        }
+    }
+
+    @Test
+    void 회원조회_EntityGraph_Query() {
+        // given
+        Team teamA = teamRepository.save(new Team("TEAM A"));
+        Team teamB = teamRepository.save(new Team("TEAM B"));
+        Member memberA = memberRepository.save(new Member("MEMBER A", 30, teamA));
+        Member memberB = memberRepository.save(new Member("MEMBER B", 25, teamB));
+        em.flush();
+        em.clear();
+
+        // when
+        List<Member> members = memberRepository.findAllEntityGraph();
+
+        // then
+        for (Member member : members) {
+            System.out.println(member.getTeam().getName() + " => " + member);
+        }
+    }
 }
