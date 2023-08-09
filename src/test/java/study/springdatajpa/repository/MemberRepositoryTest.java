@@ -299,4 +299,45 @@ class MemberRepositoryTest {
             System.out.println(member.getTeam().getName() + " => " + member);
         }
     }
+
+    @Test
+    void JPA_Hint() {
+        // given
+        Member memberA = memberRepository.save(new Member("MEMBER A", 10));
+        em.flush(); // DB에 쿼리 날림
+        em.clear(); // 영속성 컨텍스트 비움
+
+        // when
+        Member findMember = memberRepository.findById(memberA.getId()).orElseThrow(NoSuchElementException::new);
+        findMember.setName("MEMBER A(modified)");
+        em.flush();
+        em.clear();
+
+        // 더티체킹을 하려면 영속성 컨텍스트는 내부적으로 원본 데이터를 가지고 있어야함 -> 리소스가 쓰임
+        // 나는 단순 조회만 할꺼니까 더티체킹 필요없다면?
+        Member memberReadOnly = memberRepository.findByIdReadOnly(memberA.getId());
+        memberReadOnly.setName("TEST");
+        em.flush();
+        em.clear();
+
+        Member member = memberRepository.findById(memberA.getId()).orElseThrow(NoSuchElementException::new);
+
+        // then
+        assertThat(member.getName()).isEqualTo(findMember.getName());
+    }
+
+    @Test
+    void DB_LOCK() {
+        // given
+        Team teamA = teamRepository.save(new Team("TEAM A"));
+        Team teamB = teamRepository.save(new Team("TEAM B"));
+        Member memberA = memberRepository.save(new Member("MEMBER A", 30, teamA));
+        Member memberB = memberRepository.save(new Member("MEMBER B", 25, teamB));
+        em.flush();
+        em.clear();
+
+        // when
+        // then
+        memberRepository.findAllByNameApplyingLock("MEMBER A");
+    }
 }
