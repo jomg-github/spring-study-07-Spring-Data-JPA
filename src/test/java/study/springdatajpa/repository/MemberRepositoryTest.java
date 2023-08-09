@@ -340,4 +340,12 @@ class MemberRepositoryTest {
         // then
         memberRepository.findAllByNameApplyingLock("MEMBER A");
     }
+
+    @Test
+    void 커스텀_리포지토리() {
+        // given
+        // when
+        // then
+        List<Member> memberCustom = memberRepository.findMemberCustom();
+    }
 }

@@ -14,7 +14,7 @@ import study.springdatajpa.entity.Member;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
     List<Member> findByNameContainingAndAgeGreaterThan(String name, Integer age);
 
     @Query(name = "Member.findByNameNamedQuery")
