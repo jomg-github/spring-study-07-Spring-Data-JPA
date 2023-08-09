@@ -50,4 +50,18 @@ public class MemberJpaRepository {
                 .setParameter("age", age)
                 .getResultList();
     }
+
+    public List<Member> findPagedMembersByAge(Integer age, Integer offset, Integer limit) {
+        return em.createQuery("select m from Member m where m.age >= :age order by m.name desc", Member.class)
+                .setParameter("age", age)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    public Long countByAge(Integer age) {
+        return em.createQuery("select count(m) from Member m where m.age >= :age", Long.class)
+                .setParameter("age", age)
+                .getSingleResult();
+    }
 }

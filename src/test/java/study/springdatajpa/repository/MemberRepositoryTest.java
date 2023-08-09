@@ -3,6 +3,10 @@ package study.springdatajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import study.springdatajpa.dto.MemberDTO;
 import study.springdatajpa.entity.Member;
@@ -169,6 +173,37 @@ class MemberRepositoryTest {
         assertThat(조민기1.size()).isEqualTo(2);
         assertThat(조민기2).isEqualTo(member);
         assertThatThrownBy(() -> 조민기999.get()).isInstanceOf(NoSuchElementException.class);
+    }
 
+    @Test
+    void 페이징_테스트() {
+        // given
+        memberRepository.save(new Member("조민기1", 10));
+        memberRepository.save(new Member("조민기2", 20));
+        memberRepository.save(new Member("조민기3", 30));
+        memberRepository.save(new Member("조민기4", 40));
+        memberRepository.save(new Member("조민기5", 50));
+        memberRepository.save(new Member("조민기6", 5));
+        memberRepository.save(new Member("조민기7", 8));
+
+        // when
+        Integer age = 10;
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "name"));
+
+        Page<Member> page = memberRepository.findPagedMembersByAgeGreaterThanEqual(age, pageRequest);
+        Slice<Member> slice = memberRepository.findSlicedMembersByAgeGreaterThanEqual(age, pageRequest);
+        List<Member> members = memberRepository.findMembersByAgeGreaterThanEqual(age, pageRequest);
+        Page<MemberDTO> dtoPage = page.map(m -> new MemberDTO(m.getId(), m.getName()));
+
+        List<Member> membersByAge = page.getContent();
+
+        // then
+        assertThat(membersByAge.size()).isEqualTo(3);
+        assertThat(page.getTotalElements()).isEqualTo(5);
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getTotalPages()).isEqualTo(2);
+        assertThat(page.isFirst()).isTrue();
+        assertThat(page.hasNext()).isTrue();
     }
 }

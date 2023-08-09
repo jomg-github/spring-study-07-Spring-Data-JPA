@@ -78,4 +78,28 @@ class MemberJpaRepositoryTest {
         assertThat(members.size()).isEqualTo(1);
         assertThat(members.get(0)).isEqualTo(memberA);
     }
+
+    @Test
+    void 페이징_테스트() {
+        // given
+        memberJpaRepository.save(new Member("조민기1", 10));
+        memberJpaRepository.save(new Member("조민기2", 20));
+        memberJpaRepository.save(new Member("조민기3", 30));
+        memberJpaRepository.save(new Member("조민기4", 40));
+        memberJpaRepository.save(new Member("조민기5", 50));
+        memberJpaRepository.save(new Member("조민기6", 5));
+        memberJpaRepository.save(new Member("조민기7", 8));
+
+        // when
+        Integer age = 10;
+        Integer offset = 0;
+        Integer limit = 3;
+
+        List<Member> membersByAge = memberJpaRepository.findPagedMembersByAge(age, offset, limit);
+        Long total = memberJpaRepository.countByAge(age);
+
+        // then
+        assertThat(membersByAge.size()).isEqualTo(3);
+        assertThat(total).isEqualTo(5);
+    }
 }
