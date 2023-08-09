@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import study.springdatajpa.dto.MemberDTO;
@@ -37,4 +38,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Page<Member> findPagedMembersByAgeGreaterThanEqual(Integer age, Pageable pageable);
     Slice<Member> findSlicedMembersByAgeGreaterThanEqual(Integer age, Pageable pageable);
     List<Member> findMembersByAgeGreaterThanEqual(Integer age, Pageable pageable);
+
+    @Modifying // 있어야 executeUpdate 실행, 아니면 에러 발생
+//    @Modifying(clearAutomatically = true) // 쿼리 실행 이후 영속성 컨텍스트 비워주는 옵션
+    @Query("update Member m set m.age = m.age + 1")
+    Integer bulkAgePlus1();
 }

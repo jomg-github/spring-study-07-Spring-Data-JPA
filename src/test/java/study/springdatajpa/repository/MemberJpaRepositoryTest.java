@@ -3,6 +3,7 @@ package study.springdatajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import study.springdatajpa.entity.Member;
 
@@ -101,5 +102,26 @@ class MemberJpaRepositoryTest {
         // then
         assertThat(membersByAge.size()).isEqualTo(3);
         assertThat(total).isEqualTo(5);
+    }
+
+    @Test
+    void 회원전체_나이_1증가() {
+        // given
+        memberJpaRepository.save(new Member("조민기1", 30));
+        memberJpaRepository.save(new Member("조민기2", 30));
+        memberJpaRepository.save(new Member("조민기3", 30));
+        memberJpaRepository.save(new Member("조민기4", 30));
+        memberJpaRepository.save(new Member("조민기5", 30));
+        memberJpaRepository.save(new Member("조민기6", 30));
+        memberJpaRepository.save(new Member("조민기7", 30));
+
+        // when
+        Integer total = memberJpaRepository.count().intValue();
+        Integer affectedRows = memberJpaRepository.bulkAgePlus1();
+        List<Member> age31Members = memberJpaRepository.findPagedMembersByAge(31, 0, 100);
+
+        // then
+        assertThat(affectedRows).isEqualTo(total);
+        assertThat(age31Members.size()).isEqualTo(total);
     }
 }

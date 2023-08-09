@@ -1,5 +1,7 @@
 package study.springdatajpa.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +29,9 @@ class MemberRepositoryTest {
 
     @Autowired
     TeamRepository teamRepository;
+
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     void 회원저장() {
@@ -205,5 +210,36 @@ class MemberRepositoryTest {
         assertThat(page.getTotalPages()).isEqualTo(2);
         assertThat(page.isFirst()).isTrue();
         assertThat(page.hasNext()).isTrue();
+    }
+
+    @Test
+    void 회원전체_나이_1증가() {
+        // given
+        memberRepository.save(new Member("조민기1", 30));
+        memberRepository.save(new Member("조민기2", 30));
+        memberRepository.save(new Member("조민기3", 30));
+        memberRepository.save(new Member("조민기4", 30));
+        memberRepository.save(new Member("조민기5", 30));
+        memberRepository.save(new Member("조민기6", 30));
+        memberRepository.save(new Member("조민기7", 30));
+
+        // when
+        Integer total = Long.valueOf(memberRepository.count()).intValue();
+        Integer affectedRows = memberRepository.bulkAgePlus1();
+        List<Member> age31Members = memberRepository.findMembersByAgeGreaterThanEqual(31, PageRequest.of(0, 100));
+
+        // 주의해야할 부분!!
+        Member 조민기1 = memberRepository.findMembersByName("조민기1").get(0);
+        assertThat(조민기1.getAge()).isEqualTo(30);
+
+        em.flush();
+        em.clear();
+
+        조민기1 = memberRepository.findMembersByName("조민기1").get(0);
+        assertThat(조민기1.getAge()).isEqualTo(31);
+
+        // then
+        assertThat(affectedRows).isEqualTo(total);
+        assertThat(age31Members.size()).isEqualTo(total);
     }
 }
