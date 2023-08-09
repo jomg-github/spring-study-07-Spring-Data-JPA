@@ -38,4 +38,16 @@ public class MemberJpaRepository {
         em.remove(member);
     }
 
+    public List<Member> findByNameNamedQuery(String name) {
+        return em.createNamedQuery("Member.findByNameNamedQuery", Member.class)
+                .setParameter("name", name)
+                .getResultList();
+    }
+
+    public List<Member> findByNameContainingAndAgeGreaterThan(String name, Integer age) {
+        return em.createQuery("select m from Member m where m.name like :name and m.age > :age", Member.class)
+                .setParameter("name", "%" + name + "%")
+                .setParameter("age", age)
+                .getResultList();
+    }
 }

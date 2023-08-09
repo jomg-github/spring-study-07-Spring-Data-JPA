@@ -9,6 +9,7 @@ import study.springdatajpa.entity.Member;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -49,5 +50,32 @@ class MemberJpaRepositoryTest {
         memberJpaRepository.delete(memberB);
         Long total = memberJpaRepository.count();
         assertThat(total).isEqualTo(0L);
+    }
+
+    @Test
+    void findByNameAndAgeGreaterThan() {
+        // given
+        Member memberA = memberJpaRepository.save(new Member("조민기", 10));
+        Member memberB = memberJpaRepository.save(new Member("이승우", 20));
+        Member memberC = memberJpaRepository.save(new Member("이병건", 30));
+
+        // when
+        List<Member> findMembers = memberJpaRepository.findByNameContainingAndAgeGreaterThan("이", 19);
+
+        // then
+        assertThat(findMembers.size()).isEqualTo(2);
+    }
+
+    @Test
+    void findByName_NamedQuery() {
+        // given
+        Member memberA = memberJpaRepository.save(new Member("조민기", 10));
+
+        // when
+        List<Member> members = memberJpaRepository.findByNameNamedQuery("조민기");
+
+        // then
+        assertThat(members.size()).isEqualTo(1);
+        assertThat(members.get(0)).isEqualTo(memberA);
     }
 }
