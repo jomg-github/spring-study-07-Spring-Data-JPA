@@ -348,4 +348,68 @@ class MemberRepositoryTest {
         // then
         List<Member> memberCustom = memberRepository.findMemberCustom();
     }
+
+    @Test
+    void projections() {
+        // given
+        Team teamA = teamRepository.save(new Team("TEAM A"));
+        Team teamB = teamRepository.save(new Team("TEAM B"));
+        Member memberA = memberRepository.save(new Member("MEMBER A", 30, teamA));
+        Member memberB = memberRepository.save(new Member("MEMBER B", 25, teamB));
+        em.flush();
+        em.clear();
+
+        // when
+        List<NameOnly> result = memberRepository.findProjectionsByName("MEMBER A");
+
+        // then
+        for (NameOnly nameOnly : result) {
+            System.out.println("nameOnly = " + nameOnly.getName());
+        }
+    }
+
+    @Test
+    void native_query() {
+        // given
+        Team teamA = teamRepository.save(new Team("TEAM A"));
+        Team teamB = teamRepository.save(new Team("TEAM B"));
+        Member memberA = memberRepository.save(new Member("MEMBER A", 30, teamA));
+        Member memberB = memberRepository.save(new Member("MEMBER B", 25, teamB));
+        em.flush();
+        em.clear();
+
+        // when
+        Member findMemberA = memberRepository.findByIdNativeQuery(teamA.getId());
+        Member findMemberB = memberRepository.findByIdNativeQuery(teamB.getId());
+
+        // then
+        assertThat(memberA).isEqualTo(findMemberA);
+        assertThat(memberB).isEqualTo(findMemberB);
+    }
+
+    @Test
+    void native_query_projection() {
+        // given
+        Team teamA = teamRepository.save(new Team("TEAM A"));
+        memberRepository.save(new Member("MEMBER A", 30, teamA));
+        memberRepository.save(new Member("MEMBER B", 25, teamA));
+        memberRepository.save(new Member("MEMBER C", 25, teamA));
+        memberRepository.save(new Member("MEMBER D", 25, teamA));
+        memberRepository.save(new Member("MEMBER E", 25, teamA));
+        memberRepository.save(new Member("MEMBER F", 25, teamA));
+        memberRepository.save(new Member("MEMBER G", 25, teamA));
+        em.flush();
+        em.clear();
+
+        // when
+        Page<MemberProjection> page = memberRepository.findAllByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> contents = page.getContent();
+
+        // then
+        for (MemberProjection content : contents) {
+            System.out.println("content.getMemberId() = " + content.getMemberId());
+            System.out.println("content.getMemberName() = " + content.getMemberName());
+            System.out.println("content.getTeamName() = " + content.getTeamName());
+        }
+    }
 }
